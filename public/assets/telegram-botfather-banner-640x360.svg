@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1A1815" />
+      <stop offset="50%" stop-color="#26221D" />
+      <stop offset="100%" stop-color="#0E0D0B" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCE0AD" />
+      <stop offset="50%" stop-color="#DFBA73" />
+      <stop offset="100%" stop-color="#A57D32" />
+    </linearGradient>
+    <linearGradient id="tgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2AABEE" />
+      <stop offset="100%" stop-color="#229ED9" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="640" height="360" fill="url(#bgGrad)" />
+
+  <!-- Subtle Geometric Decorative Lines -->
+  <circle cx="560" cy="80" r="180" stroke="url(#goldGrad)" stroke-width="1" fill="none" opacity="0.15" />
+  <circle cx="560" cy="80" r="230" stroke="url(#goldGrad)" stroke-width="0.75" stroke-dasharray="4 8" fill="none" opacity="0.12" />
+  <circle cx="80" cy="300" r="140" stroke="url(#goldGrad)" stroke-width="1" fill="none" opacity="0.1" />
+
+  <!-- Luxury Border -->
+  <rect x="24" y="24" width="592" height="312" rx="16" fill="none" stroke="url(#goldGrad)" stroke-width="1.5" opacity="0.4" />
+  <rect x="32" y="32" width="576" height="296" rx="12" fill="none" stroke="url(#goldGrad)" stroke-width="0.5" stroke-dasharray="3 6" opacity="0.25" />
+
+  <!-- Telegram Badge -->
+  <g transform="translate(48, 52)">
+    <rect width="130" height="30" rx="15" fill="url(#tgGrad)" filter="url(#shadow)" />
+    <!-- Telegram paper plane icon -->
+    <path d="M18 15 L24 20 L22 25 L24 23 L28 20" fill="none" stroke="#FFFFFF" stroke-width="1.5"/>
+    <path d="M15 15 L31 9 L27 23 L22 18 L19 19 Z" fill="#FFFFFF"/>
+    <text x="38" y="19" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" letter-spacing="0.5">MINI APP</text>
+  </g>
+
+  <!-- Main Luxury Title -->
+  <text x="320" y="165" text-anchor="middle" font-family="'Didot', 'Bodoni MT', 'Cinzel', serif, -apple-system" font-size="34" font-weight="700" fill="url(#goldGrad)" letter-spacing="4" filter="url(#shadow)">
+    TIHUT BOUTIQUE
+  </text>
+
+  <!-- Subtitle -->
+  <text x="320" y="200" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#E6DFD5" letter-spacing="3" opacity="0.9">
+    HAUTE COUTURE • IMPORT ORDERS • LIVE INVENTORY
+  </text>
+
+  <!-- Ornamental Divider -->
+  <g transform="translate(230, 220)">
+    <line x1="0" y1="0" x2="70" y2="0" stroke="url(#goldGrad)" stroke-width="1" opacity="0.6"/>
+    <polygon points="90,-4 94,0 90,4 86,0" fill="url(#goldGrad)" opacity="0.8"/>
+    <line x1="110" y1="0" x2="180" y2="0" stroke="url(#goldGrad)" stroke-width="1" opacity="0.6"/>
+  </g>
+
+  <!-- Feature Pills -->
+  <g transform="translate(145, 255)">
+    <!-- Pill 1 -->
+    <rect x="0" y="0" width="105" height="26" rx="13" fill="#FFFFFF" fill-opacity="0.08" stroke="url(#goldGrad)" stroke-width="0.75" />
+    <text x="52.5" y="17" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" font-weight="600" fill="#FCE0AD">⚡ Fast Pre-Orders</text>
+
+    <!-- Pill 2 -->
+    <rect x="120" y="0" width="110" height="26" rx="13" fill="#FFFFFF" fill-opacity="0.08" stroke="url(#goldGrad)" stroke-width="0.75" />
+    <text x="175" y="17" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" font-weight="600" fill="#FCE0AD">👗 Real-Time Stock</text>
+
+    <!-- Pill 3 -->
+    <rect x="245" y="0" width="105" height="26" rx="13" fill="#FFFFFF" fill-opacity="0.08" stroke="url(#goldGrad)" stroke-width="0.75" />
+    <text x="297.5" y="17" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" font-weight="600" fill="#FCE0AD">🧾 Instant Receipts</text>
+  </g>
+
+  <!-- Size Specification Stamp in bottom right -->
+  <text x="580" y="320" text-anchor="end" font-family="monospace" font-size="9" fill="#888075" letter-spacing="1">
+    640 × 360 PX • TELEGRAM APP PHOTO
+  </text>
+</svg>

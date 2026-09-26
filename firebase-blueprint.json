@@ -1,0 +1,23 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Inventory product",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "sku": { "type": "string" },
+        "costPrice": { "type": "number" },
+        "sellingPrice": { "type": "number" }
+      },
+      "required": ["id", "name", "sku", "sellingPrice"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": { "$ref": "Product" },
+      "description": "Collection of products"
+    }
+  }
+}
