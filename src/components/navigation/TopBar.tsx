@@ -17,6 +17,10 @@ export const TopBar: React.FC = () => {
     setSelectedCategory,
     setStorefrontTab,
     storefrontTab,
+    currentUser,
+    isLoggedIn,
+    logout,
+    setIsAuthModalOpen,
   } = useRetail();
 
   return (
@@ -46,6 +50,32 @@ export const TopBar: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Logged in User Badge in Top Ribbon */}
+          {isLoggedIn && currentUser ? (
+            <div className="flex items-center gap-2 bg-stone-900 px-2.5 py-1 rounded-md border border-stone-800 text-[11px]">
+              <div className="w-5 h-5 rounded-full bg-amber-500 text-stone-950 font-bold flex items-center justify-center text-[10px]">
+                {currentUser.name.slice(0, 1)}
+              </div>
+              <span className="font-semibold text-stone-200">{currentUser.name}</span>
+              <span className="text-[9px] uppercase px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
+                {currentUser.role}
+              </span>
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="text-stone-400 hover:text-white underline ml-1 cursor-pointer"
+              >
+                Profile
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
+              className="px-2.5 py-1 rounded-md bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs cursor-pointer transition-colors"
+            >
+              Log In
+            </button>
+          )}
+
           {/* Interface Switcher Segmented Control */}
           <div className="flex items-center bg-stone-900 rounded-md p-0.5 border border-stone-800">
             <button
@@ -86,10 +116,9 @@ export const TopBar: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Top Bar following Top Bar Contract (Brand Title — Nav Links — Primary Actions) */}
+      {/* Main Top Bar following Top Bar Contract */}
       {activeView === 'storefront' && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* Zone 1: Single text element wordmark */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
@@ -102,7 +131,6 @@ export const TopBar: React.FC = () => {
             </button>
           </div>
 
-          {/* Zone 2: 4-6 clean text navigation links */}
           <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-stone-600">
             <button
               onClick={() => {
@@ -145,9 +173,7 @@ export const TopBar: React.FC = () => {
             </button>
           </nav>
 
-          {/* Zone 3: 1-2 primary actions */}
           <div className="flex items-center gap-3">
-            {/* Telegram Direct Channel link */}
             <a
               href={currentBusiness.telegramChannel || `https://t.me/${currentBusiness.telegramUsername}`}
               target="_blank"
@@ -158,14 +184,14 @@ export const TopBar: React.FC = () => {
               <span>@{currentBusiness.telegramUsername}</span>
             </a>
 
-            {/* Customer Account Button */}
+            {/* Account & Profile Button */}
             <button
-              onClick={() => setIsAccountOpen(true)}
-              className="p-2 text-stone-600 hover:text-stone-900 rounded-full hover:bg-stone-100 transition-colors relative"
-              title="Customer Account & Orders"
-              aria-label="Account"
+              onClick={() => setIsAuthModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-stone-700 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors cursor-pointer"
+              title="User Account & Login State"
             >
-              <User className="w-5 h-5" />
+              <User className="w-4 h-4 text-stone-600" />
+              <span>{isLoggedIn && currentUser ? currentUser.name.split(' ')[0] : 'Log In'}</span>
             </button>
 
             {/* Selected Pieces for Telegram Order Button */}
@@ -199,6 +225,21 @@ export const TopBar: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Logged in User Indicator */}
+            {isLoggedIn && currentUser && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 border border-amber-200 rounded-lg text-xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span className="text-stone-600 font-medium">Logged in:</span>
+                <span className="font-bold text-stone-900">{currentUser.name}</span>
+                <button
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="text-[#993333] hover:underline font-bold text-[11px] ml-1 cursor-pointer"
+                >
+                  [Account]
+                </button>
+              </div>
+            )}
+
             <button
               onClick={() => setActiveView('telegram')}
               className="flex items-center gap-1.5 text-xs text-[#0088CC] bg-sky-50 hover:bg-sky-100 font-semibold py-1 px-2.5 rounded-lg border border-sky-200 transition-colors cursor-pointer"

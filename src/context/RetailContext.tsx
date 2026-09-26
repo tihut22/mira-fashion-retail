@@ -18,6 +18,7 @@ import {
   ProductVariant,
   ProductImage,
   PackageBatch,
+  UserAccount,
 } from '../types';
 import {
   INITIAL_BUSINESSES,
@@ -175,6 +176,14 @@ interface RetailContextType {
   lastPlacedOrder: Order | null;
   setLastPlacedOrder: (order: Order | null) => void;
 
+  // User Auth & Session
+  currentUser: UserAccount | null;
+  isLoggedIn: boolean;
+  login: (userData: { name: string; email?: string; phone?: string; telegram?: string; role?: 'admin' | 'staff' | 'customer' }) => void;
+  logout: () => void;
+  isAuthModalOpen: boolean;
+  setIsAuthModalOpen: (open: boolean) => void;
+
   // Settings & System Reset
   updateBusinessSettings: (updatedSettings: Partial<Business>) => void;
   clearAllData: () => void;
@@ -190,6 +199,7 @@ const STORAGE_KEYS = {
   ORDERS: 'retail_orders_v1',
   PACKAGE_BATCHES: 'retail_package_batches_v1',
   PROFILE: 'retail_customer_profile_v1',
+  USER_SESSION: 'retail_logged_user_v1',
 };
 
 export const RetailProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -374,6 +384,63 @@ export const RetailProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       address: 'Bole Atlas, Gabon Street, Building 12',
     };
   });
+
+  // User Auth & Session State
+  const [currentUser, setCurrentUser] = useState<UserAccount | null>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.USER_SESSION);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.name) return parsed;
+      }
+    } catch {}
+    return {
+      id: 'usr-default-admin',
+      name: 'Selamawit Haile',
+      email: 'selamawit@mirafashion.com',
+      phone: '+251 91 199 8877',
+      telegram: '@selamawit_h',
+      role: 'admin',
+    };
+  });
+
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const isLoggedIn = useMemo(() => currentUser !== null, [currentUser]);
+
+  const login = (userData: {
+    name: string;
+    email?: string;
+    phone?: string;
+    telegram?: string;
+    role?: 'admin' | 'staff' | 'customer';
+  }) => {
+    const newUser: UserAccount = {
+      id: `usr-${Date.now()}`,
+      name: userData.name,
+      email: userData.email || `${userData.name.toLowerCase().replace(/\s+/g, '')}@example.com`,
+      phone: userData.phone || '+251 91 100 2233',
+      telegram: userData.telegram || `@${userData.name.toLowerCase().replace(/\s+/g, '_')}`,
+      role: userData.role || 'admin',
+    };
+    setCurrentUser(newUser);
+    setCustomerProfile((prev) => ({
+      ...prev,
+      name: newUser.name,
+      phone: newUser.phone,
+      email: newUser.email,
+      telegram: newUser.telegram || '',
+    }));
+    try {
+      localStorage.setItem(STORAGE_KEYS.USER_SESSION, JSON.stringify(newUser));
+    } catch {}
+  };
+
+  const logout = () => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem(STORAGE_KEYS.USER_SESSION);
+    } catch {}
+  };
 
   // Persistence effects
   useEffect(() => {
@@ -1388,6 +1455,13 @@ export const RetailProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setIsAccountOpen,
         lastPlacedOrder,
         setLastPlacedOrder,
+
+        currentUser,
+        isLoggedIn,
+        login,
+        logout,
+        isAuthModalOpen,
+        setIsAuthModalOpen,
 
         updateBusinessSettings,
         clearAllData: () => {

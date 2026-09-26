@@ -10,6 +10,7 @@ import { CartDrawer } from './components/storefront/CartDrawer';
 import { CheckoutModal } from './components/storefront/CheckoutModal';
 import { OrderConfirmationModal } from './components/storefront/OrderConfirmationModal';
 import { CustomerAccountModal } from './components/storefront/CustomerAccountModal';
+import { AuthModal } from './components/common/AuthModal';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -97,6 +98,7 @@ const AppContent: React.FC = () => {
       <CheckoutModal />
       <OrderConfirmationModal />
       <CustomerAccountModal />
+      <AuthModal />
     </div>
   );
 };

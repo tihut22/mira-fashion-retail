@@ -164,3 +164,13 @@ export interface TelegramUser {
   language_code?: string;
   photo_url?: string;
 }
+
+export interface UserAccount {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  telegram?: string;
+  role: 'admin' | 'staff' | 'customer';
+  avatarUrl?: string;
+}
