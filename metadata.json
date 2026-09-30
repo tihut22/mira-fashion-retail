@@ -1,0 +1,6 @@
+{
+  "name": "Mira Fashion Retail & Storefront",
+  "description": "Multi-tenant fashion retail management platform with unified inventory, customer storefront, and direct Telegram ordering.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
