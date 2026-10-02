@@ -2,9 +2,9 @@ import { createClient } from '@supabase/supabase-js';
 import { Business, Category, Order, Product, PackageBatch } from '../types';
 
 const rawUrl =
-  import.meta.env.VITE_SUPABASE_URL || 'https://siizfdctcqjwjonibets.supabase.co';
+  (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_SUPABASE_URL) || 'https://siizfdctcqjwjonibets.supabase.co';
 const rawKey =
-  import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_8Uowdf4cyGFSZec-SLFuGg_xFhghyZC';
+  (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_SUPABASE_ANON_KEY) || 'sb_publishable_8Uowdf4cyGFSZec-SLFuGg_xFhghyZC';
 
 export const isSupabaseConfigured = Boolean(
   rawUrl &&

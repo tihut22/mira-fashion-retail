@@ -1,5 +1,15 @@
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
-import { supabase } from '../utils/supabase';
+import {
+  supabase,
+  mapProductFromDb,
+  mapProductToDb,
+  mapCategoryFromDb,
+  mapCategoryToDb,
+  mapOrderFromDb,
+  mapOrderToDb,
+  mapBatchFromDb,
+  mapBatchToDb,
+} from '../utils/supabase';
 import { compressImage } from '../utils/imageCompression';
 import { handleFirestoreError, OperationType } from '../utils/firestoreError';
 import { sanitizeForFirestore } from '../utils/firestoreSanitizer';
@@ -264,27 +274,6 @@ export const RetailProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [storefrontTab, setStorefrontTab] = useState<'catalog' | 'story' | 'contact'>('catalog');
   const [adminTab, setAdminTab] = useState<'overview' | 'inventory' | 'orders' | 'settings'>('overview');
 
-  const mapProductFromDb = (p: any): Product => ({
-    id: p.id,
-    businessId: p.business_id,
-    categoryId: p.category_id,
-    sku: p.sku,
-    name: p.name,
-    description: p.description,
-    details: p.details,
-    costPrice: p.cost_price,
-    sellingPrice: p.selling_price,
-    discountPrice: p.discount_price,
-    taxRate: p.tax_rate,
-    isActive: p.is_active,
-    isPublished: p.is_published,
-    isOnline: p.is_online,
-    images: typeof p.images === 'string' ? JSON.parse(p.images) : p.images,
-    variants: typeof p.variants === 'string' ? JSON.parse(p.variants) : p.variants,
-    createdAt: p.created_at,
-    updatedAt: p.updated_at
-  });
-
   // Products & Categories
   const [products, setProducts] = useState<Product[]>(() => {
     try {
@@ -296,21 +285,6 @@ export const RetailProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } catch {}
     return INITIAL_PRODUCTS;
   });
-
-  useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const { data, error } = await supabase.from('products').select('*');
-        if (error) throw error;
-        if (data && data.length > 0) {
-          setProducts(data.map(mapProductFromDb));
-        }
-      } catch (error) {
-        console.warn('Using local inventory fallback (Supabase query info):', error);
-      }
-    }
-    fetchProducts();
-  }, []);
 
   const [categories, setCategories] = useState<Category[]>(() => {
     try {
@@ -349,6 +323,89 @@ export const RetailProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } catch {}
     return INITIAL_PACKAGE_BATCHES;
   });
+
+  // Supabase Initial Sync & Realtime Subscription across all devices
+  useEffect(() => {
+    async function loadAllFromSupabase() {
+      try {
+        const [prodRes, catRes, ordRes, batchRes] = await Promise.all([
+          supabase.from('products').select('*'),
+          supabase.from('categories').select('*'),
+          supabase.from('orders').select('*'),
+          supabase.from('package_batches').select('*'),
+        ]);
+
+        if (prodRes.data && Array.isArray(prodRes.data)) {
+          setProducts(prodRes.data.map(mapProductFromDb));
+        }
+        if (catRes.data && Array.isArray(catRes.data) && catRes.data.length > 0) {
+          setCategories(catRes.data.map(mapCategoryFromDb));
+        }
+        if (ordRes.data && Array.isArray(ordRes.data)) {
+          setOrders(ordRes.data.map(mapOrderFromDb));
+        }
+        if (batchRes.data && Array.isArray(batchRes.data) && batchRes.data.length > 0) {
+          setPackageBatches(batchRes.data.map(mapBatchFromDb));
+        }
+      } catch (err) {
+        console.warn('Supabase initial fetch info:', err);
+      }
+    }
+
+    loadAllFromSupabase();
+
+    const channel = supabase
+      .channel('mira_realtime_sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
+        if (payload.eventType === 'INSERT' && payload.new) {
+          const newP = mapProductFromDb(payload.new);
+          setProducts((prev) => (prev.some((p) => p.id === newP.id) ? prev.map((p) => (p.id === newP.id ? newP : p)) : [newP, ...prev]));
+        } else if (payload.eventType === 'UPDATE' && payload.new) {
+          const updatedP = mapProductFromDb(payload.new);
+          setProducts((prev) => prev.map((p) => (p.id === updatedP.id ? updatedP : p)));
+        } else if (payload.eventType === 'DELETE' && payload.old) {
+          setProducts((prev) => prev.filter((p) => p.id !== payload.old.id));
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+        if (payload.eventType === 'INSERT' && payload.new) {
+          const newO = mapOrderFromDb(payload.new);
+          setOrders((prev) => (prev.some((o) => o.id === newO.id) ? prev.map((o) => (o.id === newO.id ? newO : o)) : [newO, ...prev]));
+        } else if (payload.eventType === 'UPDATE' && payload.new) {
+          const updatedO = mapOrderFromDb(payload.new);
+          setOrders((prev) => prev.map((o) => (o.id === updatedO.id ? updatedO : o)));
+        } else if (payload.eventType === 'DELETE' && payload.old) {
+          setOrders((prev) => prev.filter((o) => o.id !== payload.old.id));
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, (payload) => {
+        if (payload.eventType === 'INSERT' && payload.new) {
+          const newC = mapCategoryFromDb(payload.new);
+          setCategories((prev) => (prev.some((c) => c.id === newC.id) ? prev : [...prev, newC]));
+        } else if (payload.eventType === 'UPDATE' && payload.new) {
+          const updatedC = mapCategoryFromDb(payload.new);
+          setCategories((prev) => prev.map((c) => (c.id === updatedC.id ? updatedC : c)));
+        } else if (payload.eventType === 'DELETE' && payload.old) {
+          setCategories((prev) => prev.filter((c) => c.id !== payload.old.id));
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'package_batches' }, (payload) => {
+        if (payload.eventType === 'INSERT' && payload.new) {
+          const newB = mapBatchFromDb(payload.new);
+          setPackageBatches((prev) => (prev.some((b) => b.id === newB.id) ? prev : [...prev, newB]));
+        } else if (payload.eventType === 'UPDATE' && payload.new) {
+          const updatedB = mapBatchFromDb(payload.new);
+          setPackageBatches((prev) => prev.map((b) => (b.id === updatedB.id ? updatedB : b)));
+        } else if (payload.eventType === 'DELETE' && payload.old) {
+          setPackageBatches((prev) => prev.filter((b) => b.id !== payload.old.id));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   // UI state
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -1353,6 +1410,11 @@ export const RetailProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       createdAt: new Date().toISOString(),
     };
     setPackageBatches((prev) => [newBatch, ...prev]);
+    try {
+      supabase.from('package_batches').insert([mapBatchToDb(newBatch)]).then(({ error }) => {
+        if (error) console.warn('Supabase batch insert info:', error.message);
+      });
+    } catch {}
     return newBatch;
   };
 
@@ -1360,6 +1422,11 @@ export const RetailProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setPackageBatches((prev) =>
       prev.map((b) => (b.id === updatedBatch.id ? updatedBatch : b))
     );
+    try {
+      supabase.from('package_batches').update(mapBatchToDb(updatedBatch)).eq('id', updatedBatch.id).then(({ error }) => {
+        if (error) console.warn('Supabase batch update info:', error.message);
+      });
+    } catch {}
   };
 
   const deletePackageBatch = (batchId: string) => {
@@ -1367,6 +1434,11 @@ export const RetailProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setOrders((prev) =>
       prev.map((o) => (o.packageBatchId === batchId ? { ...o, packageBatchId: undefined } : o))
     );
+    try {
+      supabase.from('package_batches').delete().eq('id', batchId).then(({ error }) => {
+        if (error) console.warn('Supabase batch delete info:', error.message);
+      });
+    } catch {}
   };
 
   const updateBusinessSettings = (updated: Partial<Business>) => {
